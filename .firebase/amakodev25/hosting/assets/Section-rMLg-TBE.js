@@ -1,0 +1,1 @@
+import{j as r,m as a}from"./framer-motion-D_acYgdO.js";const o=({children:o})=>r.jsx(a.div,{initial:{opacity:0,y:20},animate:{opacity:1,y:0},transition:{duration:.5},className:"bg-gray-800/50 backdrop-blur-lg rounded-lg p-8 shadow-xl border border-gray-700/50",children:o});export{o as S};
