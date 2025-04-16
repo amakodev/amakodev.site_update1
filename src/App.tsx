@@ -7,6 +7,9 @@ import Navigation from './components/Navigation';
 import FloatingContact from './components/FloatingContact';
 import Hero from './components/Hero';
 
+// Static import for ChatbotAgent
+import ChatbotAgent from './components/ChatbotAgent';
+
 // Defer non-critical components with proper loading boundaries
 const ParallaxBackground = lazy(() => import('./components/ParallaxBackground'));
 const Experience = lazy(() => 
@@ -23,10 +26,6 @@ const Projects = lazy(() =>
 );
 const TourGuide = lazy(() => 
   import(/* webpackChunkName: "tour-guide" */ './components/TourGuide')
-    .then(module => ({ default: module.default }))
-);
-const ChatbotAgent = lazy(() => 
-  import(/* webpackChunkName: "chatbot" */ './components/ChatbotAgent')
     .then(module => ({ default: module.default }))
 );
 
@@ -264,9 +263,21 @@ function App() {
 
                 <Suspense fallback={<LoadingPlaceholder />}>
                   {currentSection === 0 && <Hero onNavigate={setCurrentSection} />}
-                  {currentSection === 1 && <Experience />}
-                  {currentSection === 2 && <Skills />}
-                  {currentSection === 3 && <Projects />}
+                  {currentSection === 1 && (
+                    <Suspense fallback={<LoadingPlaceholder />}>
+                      <Experience />
+                    </Suspense>
+                  )}
+                  {currentSection === 2 && (
+                    <Suspense fallback={<LoadingPlaceholder />}>
+                      <Skills />
+                    </Suspense>
+                  )}
+                  {currentSection === 3 && (
+                    <Suspense fallback={<LoadingPlaceholder />}>
+                      <Projects />
+                    </Suspense>
+                  )}
                 </Suspense>
               </motion.div>
             </AnimatePresence>
@@ -274,25 +285,27 @@ function App() {
         </motion.div>
       </div>
 
-      {/* Fixed bottom navigation bar for floating components - conditionally rendered */}
-      <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3">
+      {/* Render ChatbotAgent directly */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <ChatbotAgent />
+      </div>
+
+      {/* Conditionally render TourGuide with Suspense */}
+      {showTourGuide && (
         <Suspense fallback={null}>
-          {showTourGuide && (
-            <TourGuide 
-              currentSection={currentSection} 
-              onClose={() => setShowTourGuide(false)} 
-            />
-          )}
+          <TourGuide 
+            currentSection={currentSection}
+            onClose={() => setShowTourGuide(false)} 
+          />
         </Suspense>
-        
-        <Suspense fallback={null}>
-          <ChatbotAgent />
-        </Suspense>
-        
+      )}
+      
+      {/* Conditionally render FloatingContact with Suspense */}
+      {hasScrolled && (
         <Suspense fallback={null}>
           <FloatingContact />
         </Suspense>
-      </div>
+      )}
     </div>
   );
 }

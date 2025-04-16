@@ -14,7 +14,7 @@
     "clean": "rimraf dist node_modules/.vite"
   },
   "dependencies": {
-    "@google/generative-ai": "^0.24.0",
+    "@google/genai": "^0.8.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
