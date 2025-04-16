@@ -1,29 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, Sparkles, Brain, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { 
+  MessageSquare, X, Send, Bot, Sparkles, Brain, 
+  ChevronDown, ChevronUp, Loader2, RefreshCw, 
+  ExternalLink, Copy, CheckCheck, Settings,
+  Zap, Flame
+} from 'lucide-react';
+import { useChatbot, Message } from '../hooks/useChatbot';
 import chatbotData from '../data/chatbot.json';
-
-interface Message {
-  type: 'user' | 'bot';
-  content: string;
-  timestamp: number;
-}
 
 const ChatbotAgent: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { 
-      type: 'bot', 
-      content: chatbotData.responses.greeting,
-      timestamp: Date.now() 
-    }
-  ]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Initialize chatbot using our custom hook with the greeting from chatbot.json
+  const { 
+    messages, 
+    isProcessing, 
+    error, 
+    sendMessage, 
+    clearChat 
+  } = useChatbot({ 
+    initialGreeting: "👋 Welcome! I'm OkamaAI by Okamalabs. I'm here to assist with information about Amako Dev's experience, skills, and projects. How can I help you today?" 
+  });
 
   // Scroll to bottom on new messages
   useEffect(() => {
@@ -46,46 +50,20 @@ const ChatbotAgent: React.FC = () => {
     }
   }, [isOpen]);
 
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMessage = input.trim();
-    const userMessageObj = { type: 'user' as const, content: userMessage, timestamp: Date.now() };
-    
-    setMessages(prev => [...prev, userMessageObj]);
-    setInput('');
-    setIsTyping(true);
-
-    // Determine response based on user input
-    let response = chatbotData.responses.default;
-    const lowerCase = userMessage.toLowerCase();
-    
-    if (lowerCase.includes('experience') || lowerCase.includes('work')) {
-      response = chatbotData.responses.experience;
-    } else if (lowerCase.includes('skill') || lowerCase.includes('know') || lowerCase.includes('tech')) {
-      response = chatbotData.responses.skills;
-    } else if (lowerCase.includes('project')) {
-      response = chatbotData.responses.projects;
-    } else if (lowerCase.includes('contact') || lowerCase.includes('reach') || lowerCase.includes('email')) {
-      response = chatbotData.responses.contact;
-    } else if (lowerCase.includes('hello') || lowerCase.includes('hi') || lowerCase.includes('hey')) {
-      response = "👋 Hello! I'm John's AI assistant. How can I help you today?";
-    } else if (lowerCase.includes('thank')) {
-      response = "You're welcome! Is there anything else you'd like to know about John or his work?";
+  // Set unread flag if new message arrives while minimized/closed
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.type === 'bot' && (!isOpen || isMinimized) && !lastMessage.isStreaming) {
+      setHasUnreadMessages(true);
     }
+  }, [messages, isOpen, isMinimized]);
 
-    // Simulate AI thinking and typing with variable delay based on response length
-    const thinkingTime = Math.min(1000 + response.length * 10, 3000);
+  const handleSend = async () => {
+    if (!input.trim() || isProcessing) return;
     
-    setTimeout(() => {
-      setMessages(prev => [...prev, { type: 'bot', content: response, timestamp: Date.now() }]);
-      setIsTyping(false);
-      
-      // Set unread flag if chat is minimized or closed
-      if (!isOpen || isMinimized) {
-        setHasUnreadMessages(true);
-      }
-    }, thinkingTime);
+    const userMessage = input.trim();
+    setInput('');
+    await sendMessage(userMessage);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -95,11 +73,18 @@ const ChatbotAgent: React.FC = () => {
     }
   };
 
+  // Copy message to clipboard
+  const copyToClipboard = (text: string, index: number) => {
+    navigator.clipboard.writeText(text);
+    setCopiedMessage(index);
+    setTimeout(() => setCopiedMessage(null), 2000);
+  };
+
   // Suggest questions that users can click to ask
   const suggestions = [
-    "What are your skills?",
-    "Tell me about your projects",
-    "How can I contact you?"
+    "Tell me about your skills",
+    "What projects have you worked on?",
+    "How can we connect?"
   ];
 
   // Format timestamp
@@ -110,9 +95,9 @@ const ChatbotAgent: React.FC = () => {
   return (
     <div className="relative">
       <motion.button
-        whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.9 }}
-        className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 text-white flex items-center justify-center shadow-xl hover:shadow-blue-500/30 transition-all duration-300"
+        className="p-3 rounded-full bg-gradient-to-r from-pink-600 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-pink-500/30 transition-all duration-300"
         onClick={() => {
           setIsOpen(true);
           setIsMinimized(false);
@@ -121,8 +106,8 @@ const ChatbotAgent: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         aria-label="Open chat assistant"
       >
-        <div className="relative">
-          <MessageSquare size={20} />
+        <div className="relative ">
+          <Flame size={22} className="text-white" />
           {hasUnreadMessages && (
             <motion.div 
               className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"
@@ -143,37 +128,51 @@ const ChatbotAgent: React.FC = () => {
               height: isMinimized ? 'auto' : 'auto'
             }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className={`absolute ${isMinimized ? 'bottom-full right-0 mb-2' : 'bottom-full right-0 mb-4'} w-80 ${
-              isMinimized ? 'max-h-16' : 'max-h-[500px]'
-            } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50`}
-            style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
+            className={`absolute ${isMinimized ? 'bottom-full right-0 mb-2' : 'bottom-full right-0 mb-4'} w-96 ${
+              isMinimized ? 'max-h-16' : 'max-h-[600px]'
+            } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-pink-500/30 overflow-hidden z-50`}
+            style={{ boxShadow: '0 10px 35px -5px rgba(236, 72, 153, 0.3)' }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
-            <div className="p-3 bg-gradient-to-r from-gray-800 to-gray-900 border-b border-gray-700 flex items-center justify-between">
+            <div className="p-3 bg-gradient-to-r from-pink-900/50 to-purple-900/50 border-b border-pink-500/30 flex items-center justify-between backdrop-blur-sm">
               <div className="flex items-center space-x-2">
-                <div className="bg-blue-500/20 p-1.5 rounded-full">
-                  <Bot className="text-blue-400" size={18} />
+                <div className="bg-pink-500/20 p-2 rounded-full">
+                  <Zap className="text-pink-400" size={16} />
                 </div>
-                <span className="font-medium text-gray-200">AI Assistant</span>
+                <span className="font-medium text-gray-200">
+                  <span className="text-pink-400">Okama</span>
+                  <span className="text-purple-400">AI</span>
+                  <span className="text-xs ml-1 text-gray-400">by Okamalabs</span>
+                </span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1.5">
+                <motion.button
+                  onClick={clearChat}
+                  className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-gray-700/50"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  aria-label="Reset chat"
+                  title="Reset chat"
+                >
+                  <RefreshCw size={14} />
+                </motion.button>
                 <motion.button
                   onClick={() => setIsMinimized(!isMinimized)}
-                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+                  className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-gray-700/50"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   aria-label={isMinimized ? "Expand chat" : "Minimize chat"}
                 >
-                  {isMinimized ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                  {isMinimized ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </motion.button>
                 <motion.button
                   onClick={() => setIsOpen(false)}
-                  className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+                  className="text-gray-400 hover:text-white transition-colors p-1.5 rounded-full hover:bg-gray-700/50"
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   aria-label="Close chat"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </motion.button>
               </div>
             </div>
@@ -186,49 +185,85 @@ const ChatbotAgent: React.FC = () => {
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
                 >
-                  <div className="h-80 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-900/50">
+                  <div className="h-96 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-900/40 backdrop-blur-sm">
                     {messages.map((message, index) => (
                       <motion.div
                         key={index}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.1 * (index % 3) }}
-                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                        transition={{ delay: 0.05 * (index % 5) }}
+                        className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} group`}
                       >
                         <div
-                          className={`max-w-[85%] p-3 rounded-xl shadow-md ${
+                          className={`max-w-[90%] p-3 rounded-xl shadow-md relative ${
                             message.type === 'user'
-                              ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-br-none'
-                              : 'bg-gray-800 text-gray-100 rounded-bl-none border border-gray-700'
+                              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-br-sm'
+                              : 'bg-gray-800 text-gray-100 rounded-bl-sm border border-pink-500/20'
                           }`}
                         >
                           {message.type === 'bot' && (
                             <div className="flex items-center space-x-2 mb-1.5">
-                              <Brain size={14} className="text-blue-400" />
-                              <span className="text-xs font-medium text-blue-400">AI Assistant</span>
+                              <Flame size={14} className="text-pink-400" />
+                              <span className="text-xs font-medium">
+                                <span className="text-pink-400">Okama</span>
+                                <span className="text-purple-400">AI</span>
+                              </span>
                               <span className="text-xs text-gray-500 ml-auto">{formatTime(message.timestamp)}</span>
                             </div>
                           )}
-                          <p className="whitespace-pre-line text-sm">{message.content}</p>
+                          
+                          <div className="relative">
+                            <p className="whitespace-pre-line text-sm">
+                              {message.content}
+                              {message.isStreaming && (
+                                <span className="inline-block w-1.5 h-4 bg-current animate-pulse ml-0.5"></span>
+                              )}
+                            </p>
+                            
+                            {message.type === 'bot' && !message.isStreaming && (
+                              <div className="absolute -right-1 top-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <motion.button
+                                  whileHover={{ scale: 1.1 }}
+                                  whileTap={{ scale: 0.9 }}
+                                  onClick={() => copyToClipboard(message.content, index)}
+                                  className="p-1 bg-gray-700 rounded-md text-gray-300 hover:text-white"
+                                  title="Copy to clipboard"
+                                >
+                                  {copiedMessage === index ? <CheckCheck size={12} /> : <Copy size={12} />}
+                                </motion.button>
+                              </div>
+                            )}
+                          </div>
+                          
                           {message.type === 'user' && (
-                            <span className="text-xs text-blue-200 block text-right mt-1">{formatTime(message.timestamp)}</span>
+                            <span className="text-xs text-pink-200 block text-right mt-1">{formatTime(message.timestamp)}</span>
                           )}
                         </div>
                       </motion.div>
                     ))}
                     
-                    {isTyping && (
+                    {isProcessing && !messages[messages.length - 1]?.isStreaming && (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="flex items-center space-x-2 text-gray-400"
                       >
-                        <div className="bg-gray-800 p-2 rounded-xl rounded-bl-none border border-gray-700 shadow-md">
+                        <div className="bg-gray-800 p-2 rounded-xl rounded-bl-sm border border-pink-500/20 shadow-md">
                           <div className="flex items-center space-x-2">
-                            <Loader2 size={14} className="text-blue-400 animate-spin" />
-                            <span className="text-xs">AI is thinking...</span>
+                            <Loader2 size={14} className="text-pink-400 animate-spin" />
+                            <span className="text-xs">Processing your request...</span>
                           </div>
                         </div>
+                      </motion.div>
+                    )}
+                    
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="p-2 bg-red-500/20 border border-red-500/50 rounded-md text-xs text-red-300"
+                      >
+                        {error}
                       </motion.div>
                     )}
                     
@@ -236,15 +271,15 @@ const ChatbotAgent: React.FC = () => {
                   </div>
 
                   {messages.length === 1 && (
-                    <div className="px-4 py-2 bg-gray-800/50">
-                      <p className="text-xs text-gray-400 mb-2">Suggested questions:</p>
+                    <div className="px-4 py-3 bg-pink-900/10 border-y border-pink-900/20">
+                      <p className="text-xs text-gray-400 mb-2 font-medium">Try asking me:</p>
                       <div className="flex flex-wrap gap-2">
                         {suggestions.map((suggestion, index) => (
                           <motion.button
                             key={index}
                             whileHover={{ scale: 1.03 }}
                             whileTap={{ scale: 0.98 }}
-                            className="text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 py-1 px-2 rounded-md transition-colors"
+                            className="text-xs bg-pink-600/20 hover:bg-pink-600/30 text-pink-300 py-1.5 px-3 rounded-md transition-colors border border-pink-700/30"
                             onClick={() => {
                               setInput(suggestion);
                               inputRef.current?.focus();
@@ -257,7 +292,7 @@ const ChatbotAgent: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="p-3 border-t border-gray-700 bg-gray-800/80">
+                  <div className="p-3 border-t border-gray-700/50 bg-gray-800/80 backdrop-blur-sm">
                     <div className="flex space-x-2">
                       <input
                         ref={inputRef}
@@ -265,24 +300,25 @@ const ChatbotAgent: React.FC = () => {
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}
-                        placeholder="Ask about John's work..."
-                        className="flex-1 bg-gray-700 text-white rounded-lg px-3 py-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-600"
-                        disabled={isTyping}
+                        placeholder="Ask me anything..."
+                        className="flex-1 bg-gray-700 text-white rounded-lg px-3 py-2.5 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-pink-500 border border-gray-600/50"
+                        disabled={isProcessing}
                       />
                       <motion.button
-                        whileHover={{ scale: 1.05, backgroundColor: '#3b82f6' }}
+                        whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                         onClick={handleSend}
-                        disabled={isTyping || !input.trim()}
-                        className={`bg-blue-500 text-white p-2 rounded-lg transition-colors ${
-                          isTyping || !input.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'
+                        disabled={isProcessing || !input.trim()}
+                        className={`bg-gradient-to-r from-pink-600 to-purple-600 text-white p-2.5 rounded-lg transition-all ${
+                          isProcessing || !input.trim() ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-lg hover:shadow-pink-500/30'
                         }`}
                       >
-                        <Send size={18} />
+                        {isProcessing ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
                       </motion.button>
                     </div>
-                    <div className="mt-2 text-center">
-                      <span className="text-xs text-gray-500">Powered by AI</span>
+                    <div className="mt-2 text-center flex items-center justify-center space-x-1">
+                      <Flame size={10} className="text-pink-400" />
+                      <span className="text-xs text-gray-500">Powered by <span className="text-pink-400">Okama</span><span className="text-purple-400">Labs</span></span>
                     </div>
                   </div>
                 </motion.div>
