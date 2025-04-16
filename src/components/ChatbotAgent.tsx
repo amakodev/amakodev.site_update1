@@ -106,7 +106,7 @@ const ChatbotAgent: React.FC = () => {
         animate={{ opacity: 1, scale: 1 }}
         aria-label="Open chat assistant"
       >
-        <div className="relative ">
+        <div className="relative">
           <Flame size={22} className="text-white" />
           {hasUnreadMessages && (
             <motion.div 
@@ -129,8 +129,8 @@ const ChatbotAgent: React.FC = () => {
             }}
             exit={{ opacity: 0, scale: 0.9 }}
             className={`absolute ${isMinimized ? 'bottom-full right-0 mb-2' : 'bottom-full right-0 mb-4'} w-96 ${
-              isMinimized ? 'max-h-16' : 'max-h-[600px]'
-            } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-pink-500/30 overflow-hidden z-50`}
+              isMinimized ? 'max-h-16' : ''
+            } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-pink-500/30 overflow-hidden z-50 flex flex-col`}
             style={{ boxShadow: '0 10px 35px -5px rgba(236, 72, 153, 0.3)' }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
@@ -184,8 +184,9 @@ const ChatbotAgent: React.FC = () => {
                   animate={{ height: 'auto', opacity: 1 }}
                   exit={{ height: 0, opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                  className="flex flex-col flex-grow"
                 >
-                  <div className="h-96 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-900/40 backdrop-blur-sm">
+                  <div className="h-72 overflow-y-auto p-4 space-y-4 custom-scrollbar bg-gray-900/40 backdrop-blur-sm">
                     {messages.map((message, index) => (
                       <motion.div
                         key={index}
@@ -271,9 +272,9 @@ const ChatbotAgent: React.FC = () => {
                   </div>
 
                   {messages.length === 1 && (
-                    <div className="px-4 py-3 bg-pink-900/10 border-y border-pink-900/20">
-                      <p className="text-xs text-gray-400 mb-2 font-medium">Try asking me:</p>
-                      <div className="flex flex-wrap gap-2">
+                    <div className="px-4 py-2 bg-pink-900/10 border-y border-pink-900/20">
+                      <p className="text-xs text-gray-400 mb-1.5 font-medium">Try asking me:</p>
+                      <div className="flex flex-wrap gap-2 mb-1.5">
                         {suggestions.map((suggestion, index) => (
                           <motion.button
                             key={index}
@@ -292,7 +293,7 @@ const ChatbotAgent: React.FC = () => {
                     </div>
                   )}
 
-                  <div className="p-3 border-t border-gray-700/50 bg-gray-800/80 backdrop-blur-sm">
+                  <div className="p-3 border-t border-gray-700/50 bg-gray-800/80 backdrop-blur-sm mt-auto">
                     <div className="flex space-x-2">
                       <input
                         ref={inputRef}
