@@ -63,18 +63,18 @@ const TourGuide: React.FC<TourGuideProps> = ({ currentSection, onClose }) => {
           height: isMinimized ? 'auto' : 'auto'
         }}
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className={`fixed bottom-4 right-4 max-w-sm ${
+        className={`fixed bottom-4 right-20 max-w-sm ${
           isMinimized ? 'w-auto' : 'w-full sm:w-96'
         } bg-gradient-to-br from-blue-900/90 to-violet-900/90 backdrop-blur-lg rounded-xl shadow-2xl border border-blue-700/50 overflow-hidden z-40`}
         style={{ 
           boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.3)' 
         }}
       >
-        <div className="p-4">
-          <div className="flex items-start justify-between">
+        <div className="p-2">
+          <div className="flex items-center justify-between gap-2 ">
             <div className="flex items-center space-x-2">
               <Sparkles className="text-yellow-300 animate-pulse" size={20} />
-              <span className="font-semibold text-white">Interactive Guide</span>
+              <span className="font-semibold text-white">Guide</span>
             </div>
             <div className="flex items-center space-x-2">
               <motion.button

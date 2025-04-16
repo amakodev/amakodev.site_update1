@@ -1,14 +1,14 @@
 {
-  "name": "John Developer",
-  "title": "Full Stack Web Developer",
+  "name": "Amako Dev",
+  "title": "Full Stack Web Developer & DevOps Engineer",
   "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&h=300",
-  "bio": "Passionate full stack developer with 5+ years of experience building scalable web applications. Specialized in React, Node.js, and cloud technologies. Let's build something amazing together!",
+  "bio": "Passionate developer with 5+ years of experience building modern web applications and architecting cloud solutions. Specializing in React, Node.js, and AWS infrastructure.",
   "social": {
-    "github": "https://github.com/johndeveloper",
-    "linkedin": "https://linkedin.com/in/johndeveloper"
+    "github": "https://github.com/amakodev",
+    "linkedin": "https://linkedin.com/in/amakodev"
   },
   "contact": {
-    "email": "john@developer.com",
+    "email": "contact@amakodev.site",
     "phone": "+1 (555) 123-4567",
     "location": "San Francisco, CA"
   }
