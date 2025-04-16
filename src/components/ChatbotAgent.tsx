@@ -108,21 +108,21 @@ const ChatbotAgent: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="relative">
       <motion.button
         whileHover={{ scale: 1.1, backgroundColor: '#3b82f6' }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-4 left-4 p-4 bg-gradient-to-r from-blue-500 to-violet-500 text-white rounded-full shadow-xl hover:shadow-blue-500/30 transition-all duration-300 z-50"
+        className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-violet-500 text-white flex items-center justify-center shadow-xl hover:shadow-blue-500/30 transition-all duration-300"
         onClick={() => {
           setIsOpen(true);
           setIsMinimized(false);
         }}
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 1, type: "spring" }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        aria-label="Open chat assistant"
       >
         <div className="relative">
-          <MessageSquare size={24} />
+          <MessageSquare size={20} />
           {hasUnreadMessages && (
             <motion.div 
               className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"
@@ -136,15 +136,14 @@ const ChatbotAgent: React.FC = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ 
               opacity: 1, 
-              y: 0, 
               scale: 1,
               height: isMinimized ? 'auto' : 'auto'
             }}
-            exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className={`fixed ${isMinimized ? 'bottom-4' : 'bottom-20'} left-4 w-80 ${
+            exit={{ opacity: 0, scale: 0.9 }}
+            className={`absolute ${isMinimized ? 'bottom-full right-0 mb-2' : 'bottom-full right-0 mb-4'} w-80 ${
               isMinimized ? 'max-h-16' : 'max-h-[500px]'
             } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-gray-700 overflow-hidden z-50`}
             style={{ boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.5)' }}
@@ -292,7 +291,7 @@ const ChatbotAgent: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

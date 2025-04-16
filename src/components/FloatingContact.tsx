@@ -61,34 +61,33 @@ const FloatingContact: React.FC = () => {
   ];
 
   return (
-    <>
+    <div className="relative">
       <motion.button
         whileHover={{ scale: 1.1, boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)' }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-16 right-4 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 transition-all duration-300 z-50"
+        className="p-3 rounded-full bg-gradient-to-r from-violet-500 to-purple-600 text-white flex items-center justify-center shadow-xl hover:shadow-purple-500/30 transition-all duration-300"
         onClick={() => {
           setIsOpen(true);
           setIsMinimized(false);
         }}
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 0.5, type: "spring" }}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring" }}
       >
-        <Mail size={24} />
+        <Mail size={20} />
       </motion.button>
 
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 100, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.9 }}
             animate={{ 
               opacity: 1, 
-              y: 0, 
               scale: 1,
               height: isMinimized ? 'auto' : 'auto'
             }}
-            exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className={`fixed ${isMinimized ? 'bottom-16 right-4' : 'bottom-24 left-4 right-4 md:left-auto md:right-4'} w-full md:w-96 ${
+            exit={{ opacity: 0, scale: 0.9 }}
+            className={`absolute ${isMinimized ? 'bottom-full right-0 mb-2' : 'bottom-full right-0 mb-4'} w-full md:w-96 ${
               isMinimized ? 'max-h-16' : 'max-h-[70vh] md:max-h-[600px]'
             } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-violet-500/30 overflow-hidden z-50`}
             style={{ 
@@ -255,7 +254,7 @@ const FloatingContact: React.FC = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 

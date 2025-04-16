@@ -155,137 +155,145 @@ function App() {
       {/* Interactive 3D Parallax Background */}
       <ParallaxBackground />
 
-      <motion.div 
-        className="relative z-10 pb-24 md:pb-32" 
-        ref={mainRef}
-        style={{ y: contentY, opacity: contentOpacity }}
-      >
+      <div className="fixed top-0 left-0 right-0 z-50">
         <Header />
         <Navigation 
           sections={sections} 
           currentSection={currentSection} 
           onSelect={setCurrentSection} 
         />
-        
-        <main className="container mx-auto px-4 py-8 relative mb-20">
-          <div className="flex items-center justify-between mb-12">
-            <motion.button
-              whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handlePrev}
-              disabled={currentSection === 0}
-              className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
-                currentSection === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
-              }`}
-              aria-label="Previous section"
-            >
-              <ChevronLeft size={24} />
-              <span className="sr-only">Previous</span>
-            </motion.button>
-            
-            <motion.h2 
-              className="text-4xl font-bold text-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              key={currentSection}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-violet-400 text-shadow">
-                {sections[currentSection]}
-              </span>
-            </motion.h2>
-            
-            <motion.button
-              whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
-              whileTap={{ scale: 0.95 }}
-              onClick={handleNext}
-              disabled={currentSection === sections.length - 1}
-              className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
-                currentSection === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
-              }`}
-              aria-label="Next section"
-            >
-              <ChevronRight size={24} />
-              <span className="sr-only">Next</span>
-            </motion.button>
-          </div>
+      </div>
+      
+      {/* Add padding to account for fixed header */}
+      <div className="pt-32 md:pt-40">
+        <motion.div 
+          className="relative z-10 pb-24 md:pb-32" 
+          ref={mainRef}
+          style={{ y: contentY, opacity: contentOpacity }}
+        >
+          <main className="container mx-auto px-4 py-8 relative mb-20">
+            <div className="flex items-center justify-between mb-12">
+              <motion.button
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handlePrev}
+                disabled={currentSection === 0}
+                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
+                  currentSection === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
+                }`}
+                aria-label="Previous section"
+              >
+                <ChevronLeft size={24} />
+                <span className="sr-only">Previous</span>
+              </motion.button>
+              
+              <motion.h2 
+                className="text-4xl font-bold text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                key={currentSection}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-violet-400 text-shadow">
+                  {sections[currentSection]}
+                </span>
+              </motion.h2>
+              
+              <motion.button
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleNext}
+                disabled={currentSection === sections.length - 1}
+                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
+                  currentSection === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
+                }`}
+                aria-label="Next section"
+              >
+                <ChevronRight size={24} />
+                <span className="sr-only">Next</span>
+              </motion.button>
+            </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSection}
-              variants={pageVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-              transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="glass-card backdrop-blur-md shadow-2xl overflow-hidden relative"
-              style={{ boxShadow: '0 20px 80px -20px rgba(59, 130, 246, 0.3)' }}
-            >
-              {/* Glowing accent border animation */}
-              <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                <motion.div 
-                  className="absolute top-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-violet-500"
-                  animate={{ x: ['0%', '200%'] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-                <motion.div 
-                  className="absolute bottom-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-violet-500 to-blue-500"
-                  animate={{ x: ['200%', '0%'] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-                <motion.div 
-                  className="absolute right-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-blue-500 to-violet-500"
-                  animate={{ y: ['0%', '200%'] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-                <motion.div 
-                  className="absolute left-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-violet-500 to-blue-500"
-                  animate={{ y: ['200%', '0%'] }}
-                  transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                />
-              </div>
-
-              <Suspense fallback={
-                <div className="flex justify-center items-center h-96">
-                  <motion.div
-                    animate={{ 
-                      rotate: 360,
-                      scale: [1, 1.1, 1]
-                    }}
-                    transition={{ 
-                      duration: 2, 
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
-                  >
-                    <Sparkles className="text-blue-400" size={30} />
-                  </motion.div>
-                  <motion.span 
-                    className="ml-3 text-blue-200 font-light tracking-wider"
-                    animate={{ opacity: [0.6, 1, 0.6] }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  >
-                    Loading...
-                  </motion.span>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSection}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="glass-card backdrop-blur-md shadow-2xl overflow-hidden relative"
+                style={{ boxShadow: '0 20px 80px -20px rgba(59, 130, 246, 0.3)' }}
+              >
+                {/* Glowing accent border animation */}
+                <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                  <motion.div 
+                    className="absolute top-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-violet-500"
+                    animate={{ x: ['0%', '200%'] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-violet-500 to-blue-500"
+                    animate={{ x: ['200%', '0%'] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute right-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-blue-500 to-violet-500"
+                    animate={{ y: ['0%', '200%'] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
+                  <motion.div 
+                    className="absolute left-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-violet-500 to-blue-500"
+                    animate={{ y: ['200%', '0%'] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                  />
                 </div>
-              }>
-                {currentSection === 0 && <Hero onNavigate={setCurrentSection} />}
-                {currentSection === 1 && <Experience />}
-                {currentSection === 2 && <Skills />}
-                {currentSection === 3 && <Projects />}
-              </Suspense>
-            </motion.div>
-          </AnimatePresence>
-        </main>
 
-        {showTourGuide && (
-          <Suspense fallback={null}>
+                <Suspense fallback={
+                  <div className="flex justify-center items-center h-96">
+                    <motion.div
+                      animate={{ 
+                        rotate: 360,
+                        scale: [1, 1.1, 1]
+                      }}
+                      transition={{ 
+                        duration: 2, 
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
+                    >
+                      <Sparkles className="text-blue-400" size={30} />
+                    </motion.div>
+                    <motion.span 
+                      className="ml-3 text-blue-200 font-light tracking-wider"
+                      animate={{ opacity: [0.6, 1, 0.6] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      Loading...
+                    </motion.span>
+                  </div>
+                }>
+                  {currentSection === 0 && <Hero onNavigate={setCurrentSection} />}
+                  {currentSection === 1 && <Experience />}
+                  {currentSection === 2 && <Skills />}
+                  {currentSection === 3 && <Projects />}
+                </Suspense>
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </motion.div>
+      </div>
+
+      {/* Fixed bottom navigation bar for floating components */}
+      <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3">
+        <Suspense fallback={null}>
+          {showTourGuide && (
             <TourGuide 
               currentSection={currentSection} 
               onClose={() => setShowTourGuide(false)} 
             />
-          </Suspense>
-        )}
+          )}
+        </Suspense>
         
         <Suspense fallback={null}>
           <ChatbotAgent />
@@ -294,7 +302,7 @@ function App() {
         <Suspense fallback={null}>
           <FloatingContact />
         </Suspense>
-      </motion.div>
+      </div>
     </div>
   );
 }

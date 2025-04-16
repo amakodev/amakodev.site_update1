@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { ChevronDown } from 'lucide-react';
 import profile from '../data/profile.json';
 
 interface HeroProps {
@@ -25,11 +26,10 @@ const Hero = ({ onNavigate }: HeroProps) => {
     return () => clearInterval(typingInterval);
   }, []);
 
-  // Handle navigation to different sections
-  const handleNavigate = (sectionIndex: number) => {
-    // Ensure navigation function is called
+  // Handle navigation to next section
+  const handleNavigateNext = () => {
     if (onNavigate) {
-      onNavigate(sectionIndex);
+      onNavigate(1); // Navigate to next section (index 1)
     }
   };
 
@@ -61,22 +61,17 @@ const Hero = ({ onNavigate }: HeroProps) => {
             <p className="text-gray-400 mb-8 max-w-lg mx-auto md:mx-0">
               {profile.bio}
             </p>
-            <div className="flex flex-wrap gap-4 justify-center md:justify-start">
-              <motion.button 
-                onClick={() => handleNavigate(3)} // Navigate to Projects section
-                className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-violet-600 hover:from-blue-700 hover:to-violet-700 text-white font-semibold rounded-lg transition duration-300 shadow-lg shadow-blue-500/20"
-                whileHover={{ scale: 1.05, boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.4)' }}
-                whileTap={{ scale: 0.95 }}
-              >
-                View Projects
-              </motion.button>
+            
+            {/* Next section arrow button */}
+            <div className="flex justify-center md:justify-start">
               <motion.button
-                onClick={() => handleNavigate(1)} // Navigate to Experience section
-                className="px-5 py-2.5 border border-blue-600 text-blue-500 hover:bg-blue-900/20 font-semibold rounded-lg transition duration-300"
-                whileHover={{ scale: 1.05 }}
+                onClick={handleNavigateNext}
+                className="p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 hover:bg-blue-500/30 hover:border-blue-400 group"
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
                 whileTap={{ scale: 0.95 }}
+                aria-label="Go to next section"
               >
-                Experience
+                <ChevronDown size={24} className="text-blue-400 group-hover:text-white transition-colors" />
               </motion.button>
             </div>
           </motion.div>

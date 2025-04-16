@@ -54,62 +54,51 @@ const TourGuide: React.FC<TourGuideProps> = ({ currentSection, onClose }) => {
 
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0, y: 50, scale: 0.9 }}
-        animate={{ 
-          opacity: 1, 
-          y: 0, 
-          scale: 1,
-          height: isMinimized ? 'auto' : 'auto'
-        }}
-        exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className={`fixed ${
-          isMinimized ? 'bottom-16 right-4' : 'bottom-24 left-4 right-4 md:left-auto md:right-20'
-        } max-w-sm ${
-          isMinimized ? 'w-auto' : 'w-full sm:w-96'
-        } bg-gradient-to-br from-blue-900/90 to-violet-900/90 backdrop-blur-lg rounded-xl shadow-2xl border border-blue-700/50 overflow-hidden z-40`}
-        style={{ 
-          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.3)',
-          maxHeight: 'calc(80vh - 100px)', // Limit height to prevent overflow
-          overflowY: 'auto'
-        }}
-      >
-        <div className="p-2">
-          <div className="flex items-center justify-between gap-2 ">
-            <div className="flex items-center space-x-2">
-              <Sparkles className="text-yellow-300 animate-pulse" size={20} />
-              <span className="font-semibold text-white">Guide</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <motion.button
-                onClick={() => setIsMinimized(!isMinimized)}
-                className="text-white hover:text-blue-300 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                aria-label={isMinimized ? "Expand guide" : "Minimize guide"}
-              >
-                <Info size={18} />
-              </motion.button>
-              <motion.button
-                onClick={() => setIsVisible(false)}
-                className="text-white hover:text-blue-300 transition-colors"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-                aria-label="Close guide"
-              >
-                <X size={18} />
-              </motion.button>
-            </div>
-          </div>
-          
-          <AnimatePresence mode="wait">
-            {!isMinimized && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-              >
+      <div className="relative">
+        {/* TourGuide toggle button */}
+        <motion.button
+          onClick={() => setIsMinimized(!isMinimized)}
+          className="p-3 rounded-full bg-blue-600/80 backdrop-blur-md transition-all duration-300 flex items-center justify-center"
+          whileHover={{ scale: 1.1, backgroundColor: 'rgba(37, 99, 235, 0.9)' }}
+          whileTap={{ scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          aria-label={isMinimized ? "Open guide" : "Minimize guide"}
+        >
+          <Info size={20} className="text-white" />
+        </motion.button>
+
+        {/* TourGuide panel */}
+        <AnimatePresence>
+          {!isMinimized && (
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.9 }}
+              animate={{ opacity: 1, y: -10, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.9 }}
+              className="absolute bottom-full right-0 mb-4 w-full sm:w-96 max-w-sm bg-gradient-to-br from-blue-900/90 to-violet-900/90 backdrop-blur-lg rounded-xl shadow-2xl border border-blue-700/50 overflow-hidden z-40"
+              style={{ 
+                boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.3)',
+                maxHeight: 'calc(80vh - 100px)',
+                overflowY: 'auto'
+              }}
+            >
+              <div className="p-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className="text-yellow-300 animate-pulse" size={20} />
+                    <span className="font-semibold text-white">Guide</span>
+                  </div>
+                  <motion.button
+                    onClick={() => setIsVisible(false)}
+                    className="text-white hover:text-blue-300 transition-colors"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.9 }}
+                    aria-label="Close guide"
+                  >
+                    <X size={18} />
+                  </motion.button>
+                </div>
+                
                 <div className="mt-3 flex space-x-3">
                   <div className="mt-1 bg-blue-400/20 p-1.5 rounded-full">
                     <MessageCircle className="text-blue-300" size={18} />
@@ -172,22 +161,22 @@ const TourGuide: React.FC<TourGuideProps> = ({ currentSection, onClose }) => {
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-        
-        <motion.div
-          className="h-1 bg-gradient-to-r from-blue-400 to-violet-500"
-          initial={{ width: "0%" }}
-          animate={{ width: "100%" }}
-          transition={{ 
-            duration: 5, 
-            repeat: Infinity,
-            ease: "easeInOut" 
-          }}
-        />
-      </motion.div>
+              </div>
+              
+              <motion.div
+                className="h-1 bg-gradient-to-r from-blue-400 to-violet-500"
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ 
+                  duration: 5, 
+                  repeat: Infinity,
+                  ease: "easeInOut" 
+                }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </AnimatePresence>
   );
 };
