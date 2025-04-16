@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, X, Send, Phone, MapPin, User, AtSign, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Mail, X, Send, Phone, MapPin, User, AtSign, MessageSquare, ChevronDown, ChevronUp, AlertTriangle, Loader } from 'lucide-react';
+import { db } from '../firebase'; // Import the initialized Firestore instance
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'; 
 
 interface FormData {
   name: string;
@@ -18,6 +20,7 @@ const FloatingContact: React.FC = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when form opens
@@ -29,21 +32,36 @@ const FloatingContact: React.FC = () => {
     }
   }, [isOpen, isMinimized]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setIsSuccess(true);
+    setError(null);
+    setIsSuccess(false);
+
+    try {
+      // Add a new document with a generated ID to the "contacts" collection
+      const docRef = await addDoc(collection(db, "contacts"), {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        submittedAt: serverTimestamp() // Add a server timestamp
+      });
       
-      // Reset form after showing success message
-      setTimeout(() => {
-        setFormData({ name: '', email: '', message: '' });
-        setIsSuccess(false);
-      }, 3000);
-    }, 1500);
+      console.log("Document written with ID: ", docRef.id);
+      setIsSuccess(true);
+      setFormData({ name: '', email: '', message: '' }); // Clear form on success
+
+      // Optionally hide the success message after a delay
+      // setTimeout(() => {
+      //   setIsSuccess(false);
+      // }, 5000);
+
+    } catch (err) {
+      console.error("Error adding document: ", err);
+      setError("Failed to send message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -51,6 +69,8 @@ const FloatingContact: React.FC = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Clear error when user starts typing again
+    if (error) setError(null);
   };
 
   // Contact info details
@@ -134,7 +154,28 @@ const FloatingContact: React.FC = () => {
                   transition={{ duration: 0.3 }}
                 >
                   <div className="p-5 bg-gray-900/30 backdrop-blur-sm">
-                    {!isSuccess ? (
+                    {isSuccess && (
+                      <motion.div 
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col items-center justify-center py-8 mb-4"
+                      >
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                          className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4"
+                        >
+                          <Send className="text-green-500" size={28} />
+                        </motion.div>
+                        <h3 className="text-xl font-medium text-white mb-2">Message Sent!</h3>
+                        <p className="text-sm text-gray-400 text-center">
+                          Thanks for reaching out. I'll get back to you soon.
+                        </p>
+                      </motion.div>
+                    )}
+
+                    {!isSuccess && (
                       <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="mb-6">
                           <h3 className="text-lg font-medium text-white mb-2">Get in Touch</h3>
@@ -192,45 +233,34 @@ const FloatingContact: React.FC = () => {
                           </div>
                         </div>
                         
+                        {error && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex items-center space-x-2 p-2 bg-red-500/10 border border-red-500/30 rounded-md text-xs text-red-300"
+                          >
+                            <AlertTriangle size={14} />
+                            <span>{error}</span>
+                          </motion.div>
+                        )}
+                        
                         <motion.button
                           type="submit"
-                          className="w-full bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-colors"
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
+                          className={`w-full bg-gradient-to-r from-violet-500 to-purple-600 text-white font-medium py-2.5 px-4 rounded-lg flex items-center justify-center space-x-2 transition-all ${
+                            isSubmitting ? 'opacity-70 cursor-not-allowed' : 'hover:from-violet-600 hover:to-purple-700'
+                          }`}
+                          whileHover={!isSubmitting ? { scale: 1.02 } : {}}
+                          whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                           disabled={isSubmitting}
                         >
                           {isSubmitting ? (
-                            <motion.div
-                              animate={{ rotate: 360 }}
-                              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                            >
-                              <Send size={18} />
-                            </motion.div>
+                            <Loader size={18} className="animate-spin" />
                           ) : (
                             <Send size={18} />
                           )}
                           <span>{isSubmitting ? "Sending..." : "Send Message"}</span>
                         </motion.button>
                       </form>
-                    ) : (
-                      <motion.div 
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="flex flex-col items-center justify-center py-8"
-                      >
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mb-4"
-                        >
-                          <Send className="text-green-500" size={28} />
-                        </motion.div>
-                        <h3 className="text-xl font-medium text-white mb-2">Message Sent!</h3>
-                        <p className="text-sm text-gray-400 text-center">
-                          Thanks for reaching out. I'll get back to you as soon as possible.
-                        </p>
-                      </motion.div>
                     )}
                     
                     <div className="mt-6 pt-4 border-t border-gray-800">
