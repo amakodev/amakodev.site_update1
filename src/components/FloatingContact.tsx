@@ -65,7 +65,7 @@ const FloatingContact: React.FC = () => {
       <motion.button
         whileHover={{ scale: 1.1, boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.5)' }}
         whileTap={{ scale: 0.9 }}
-        className="fixed bottom-4 right-4 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 transition-all duration-300 z-50"
+        className="fixed bottom-16 right-4 p-4 bg-gradient-to-r from-violet-500 to-purple-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 transition-all duration-300 z-50"
         onClick={() => {
           setIsOpen(true);
           setIsMinimized(false);
@@ -88,10 +88,13 @@ const FloatingContact: React.FC = () => {
               height: isMinimized ? 'auto' : 'auto'
             }}
             exit={{ opacity: 0, y: 100, scale: 0.9 }}
-            className={`fixed right-4 ${isMinimized ? 'bottom-4' : 'bottom-20'} w-96 ${
-              isMinimized ? 'max-h-16' : 'max-h-[600px]'
+            className={`fixed ${isMinimized ? 'bottom-16 right-4' : 'bottom-24 left-4 right-4 md:left-auto md:right-4'} w-full md:w-96 ${
+              isMinimized ? 'max-h-16' : 'max-h-[70vh] md:max-h-[600px]'
             } bg-gradient-to-br from-gray-900 to-gray-800 rounded-xl shadow-2xl border border-violet-500/30 overflow-hidden z-50`}
-            style={{ boxShadow: '0 10px 25px -5px rgba(139, 92, 246, 0.3)' }}
+            style={{ 
+              boxShadow: '0 10px 25px -5px rgba(139, 92, 246, 0.3)',
+              overflowY: 'auto'
+            }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
             <div className="p-4 bg-gradient-to-r from-violet-900/80 to-purple-900/80 border-b border-violet-700/50 flex items-center justify-between">

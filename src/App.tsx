@@ -151,12 +151,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white overflow-x-hidden">
       {/* Interactive 3D Parallax Background */}
       <ParallaxBackground />
 
       <motion.div 
-        className="relative z-10" 
+        className="relative z-10 pb-24 md:pb-32" 
         ref={mainRef}
         style={{ y: contentY, opacity: contentOpacity }}
       >
@@ -167,7 +167,7 @@ function App() {
           onSelect={setCurrentSection} 
         />
         
-        <main className="container mx-auto px-4 py-8 relative">
+        <main className="container mx-auto px-4 py-8 relative mb-20">
           <div className="flex items-center justify-between mb-12">
             <motion.button
               whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}

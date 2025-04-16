@@ -63,11 +63,15 @@ const TourGuide: React.FC<TourGuideProps> = ({ currentSection, onClose }) => {
           height: isMinimized ? 'auto' : 'auto'
         }}
         exit={{ opacity: 0, y: 50, scale: 0.9 }}
-        className={`fixed bottom-4 right-20 max-w-sm ${
+        className={`fixed ${
+          isMinimized ? 'bottom-16 right-4' : 'bottom-24 left-4 right-4 md:left-auto md:right-20'
+        } max-w-sm ${
           isMinimized ? 'w-auto' : 'w-full sm:w-96'
         } bg-gradient-to-br from-blue-900/90 to-violet-900/90 backdrop-blur-lg rounded-xl shadow-2xl border border-blue-700/50 overflow-hidden z-40`}
         style={{ 
-          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.3)' 
+          boxShadow: '0 10px 25px -5px rgba(59, 130, 246, 0.3)',
+          maxHeight: 'calc(80vh - 100px)', // Limit height to prevent overflow
+          overflowY: 'auto'
         }}
       >
         <div className="p-2">
