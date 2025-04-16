@@ -8,6 +8,8 @@
     "build": "vite build",
     "build:analyze": "cross-env ANALYZE=true vite build",
     "build:prod": "vite build --mode production",
+    "deploy": "firebase deploy --only hosting:amakodev25",
+    "deploy:build": "npm run build && npm run deploy",
     "lint": "eslint .",
     "preview": "vite preview",
     "serve:prod": "vite preview --port 5173",
