@@ -39,6 +39,9 @@
     box-shadow: 0 20px 50px -20px rgba(2, 6, 23, 0.5), 
                 inset 0 1px 1px rgba(255, 255, 255, 0.1),
                 0 0 20px rgba(59, 130, 246, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    will-change: transform, opacity;
   }
   
   .gradient-text {
@@ -79,13 +82,13 @@
   }
   
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.6);
-    border-radius: 5px;
+    background: rgba(17, 24, 39, 0.3);
+    border-radius: 10px;
   }
   
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, rgba(59, 130, 246, 0.5), rgba(139, 92, 246, 0.5));
-    border-radius: 5px;
+    background: rgba(59, 130, 246, 0.5);
+    border-radius: 10px;
   }
   
   /* 3D perspective card */
@@ -348,4 +351,45 @@
 
 .glow:hover::after {
   opacity: 1;
+}
+
+/* Animations with reduced motion support */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-menu-animation {
+    animation: slideDown 0.2s ease forwards;
+    transform-origin: top;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: scaleY(0); }
+    to { opacity: 1; transform: scaleY(1); }
+  }
+}
+
+/* Optimize animation performance */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+/* Reduce motion if user prefers */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

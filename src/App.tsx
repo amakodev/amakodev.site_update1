@@ -1,19 +1,45 @@
-import React, { useState, useEffect, lazy, Suspense, useRef } from 'react';
+import React, { useState, useEffect, lazy, Suspense, useRef, useCallback, useMemo } from 'react';
 import { ChevronRight, ChevronLeft, Code2, Database, Globe, Brain, Sparkles, ArrowDown } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import Header from './components/Header';
 import Section from './components/Section';
 import Navigation from './components/Navigation';
 import FloatingContact from './components/FloatingContact';
-import ParallaxBackground from './components/ParallaxBackground';
 import Hero from './components/Hero';
 
-// Lazy load components for better performance
-const Experience = lazy(() => import('./components/Experience'));
-const Skills = lazy(() => import('./components/Skills'));
-const Projects = lazy(() => import('./components/Projects'));
-const TourGuide = lazy(() => import('./components/TourGuide'));
-const ChatbotAgent = lazy(() => import('./components/ChatbotAgent'));
+// Defer non-critical components with proper loading boundaries
+const ParallaxBackground = lazy(() => import('./components/ParallaxBackground'));
+const Experience = lazy(() => 
+  import(/* webpackChunkName: "experience" */ './components/Experience')
+    .then(module => ({ default: module.default }))
+);
+const Skills = lazy(() => 
+  import(/* webpackChunkName: "skills" */ './components/Skills')
+    .then(module => ({ default: module.default }))
+);
+const Projects = lazy(() => 
+  import(/* webpackChunkName: "projects" */ './components/Projects')
+    .then(module => ({ default: module.default }))
+);
+const TourGuide = lazy(() => 
+  import(/* webpackChunkName: "tour-guide" */ './components/TourGuide')
+    .then(module => ({ default: module.default }))
+);
+const ChatbotAgent = lazy(() => 
+  import(/* webpackChunkName: "chatbot" */ './components/ChatbotAgent')
+    .then(module => ({ default: module.default }))
+);
+
+// Simple, lightweight loading placeholder
+const LoadingPlaceholder = () => (
+  <div className="flex justify-center items-center h-64">
+    <div className="animate-pulse bg-gray-800/80 rounded-xl p-8 flex flex-col items-center">
+      <div className="w-10 h-10 rounded-full bg-blue-500/30 mb-4"></div>
+      <div className="h-2 w-24 bg-gray-700 rounded mb-2"></div>
+      <div className="h-2 w-32 bg-gray-700 rounded"></div>
+    </div>
+  </div>
+);
 
 function App() {
   const [currentSection, setCurrentSection] = useState(0);
@@ -21,139 +47,137 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasScrolled, setHasScrolled] = useState(false);
   const mainRef = useRef<HTMLDivElement>(null);
-  const sections = ['Introduction', 'Experience', 'Skills', 'Projects'];
+  const sections = useMemo(() => ['Introduction', 'Experience', 'Skills', 'Projects'], []);
+  const [isLowEndDevice, setIsLowEndDevice] = useState(false);
 
-  // Parallax effect for scrolling
+  // Check for low-end device once on mount
+  useEffect(() => {
+    // Check device capabilities
+    const isLowEnd = 
+      window.navigator.hardwareConcurrency <= 4 || 
+      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    
+    setIsLowEndDevice(isLowEnd);
+    
+    // Reduce initial loading time based on device capability
+    const loadTime = isLowEnd ? 800 : 1000;
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, loadTime);
+    return () => clearTimeout(timer);
+  }, []);
+  
+  // Optimize parallax effect with reduced motion sensitivity
   const { scrollYProgress } = useScroll({
     target: mainRef,
     offset: ["start start", "end end"]
   });
   
-  const smoothScrollYProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30 });
-  const contentY = useTransform(smoothScrollYProgress, [0, 1], ['0%', '5%']);
-  const contentOpacity = useTransform(smoothScrollYProgress, [0, 0.5], [1, 0.8]);
+  const smoothScrollYProgress = useSpring(scrollYProgress, { 
+    stiffness: isLowEndDevice ? 50 : 100, 
+    damping: isLowEndDevice ? 20 : 30 
+  });
+  
+  const contentY = useTransform(
+    smoothScrollYProgress, 
+    [0, 1], 
+    isLowEndDevice ? ['0%', '2%'] : ['0%', '5%']
+  );
+  
+  const contentOpacity = useTransform(
+    smoothScrollYProgress, 
+    [0, 0.5], 
+    [1, isLowEndDevice ? 0.9 : 0.8]
+  );
 
-  // Simulate loading state for smoother initial render
+  // Optimized scroll detection with debouncing
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Scroll detection for animation triggers
-  useEffect(() => {
+    let scrollTimeout: number;
+    
     const handleScroll = () => {
+      // Clear previous timeout to debounce
+      window.clearTimeout(scrollTimeout);
+      
+      // Only set state if needed
       if (window.scrollY > 100 && !hasScrolled) {
         setHasScrolled(true);
       }
+      
+      // Debounce further scroll handling
+      scrollTimeout = window.setTimeout(() => {
+        // Additional scroll handling if needed
+      }, 100);
     };
     
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.clearTimeout(scrollTimeout);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [hasScrolled]);
 
-  const handleNext = () => {
+  // Memoize handlers to prevent unnecessary re-renders
+  const handleNext = useCallback(() => {
     setCurrentSection((prev) => Math.min(prev + 1, sections.length - 1));
-  };
+  }, [sections.length]);
 
-  const handlePrev = () => {
+  const handlePrev = useCallback(() => {
     setCurrentSection((prev) => Math.max(prev - 1, 0));
-  };
-
-  const handleKeyNavigation = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowRight') handleNext();
-    if (e.key === 'ArrowLeft') handlePrev();
-  };
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyNavigation);
-    return () => window.removeEventListener('keydown', handleKeyNavigation);
   }, []);
 
-  const pageVariants = {
-    initial: { opacity: 0, x: 50, scale: 0.98 },
-    animate: { opacity: 1, x: 0, scale: 1 },
-    exit: { opacity: 0, x: -50, scale: 0.98 }
-  };
+  // Optimized key navigation
+  useEffect(() => {
+    const handleKeyNavigation = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') handleNext();
+      if (e.key === 'ArrowLeft') handlePrev();
+    };
+    
+    window.addEventListener('keydown', handleKeyNavigation);
+    return () => window.removeEventListener('keydown', handleKeyNavigation);
+  }, [handleNext, handlePrev]);
 
-  // Enhanced loader with animation sequence
+  // Simplified animation variants for better performance
+  const pageVariants = useMemo(() => ({
+    initial: { opacity: 0, x: isLowEndDevice ? 20 : 50, scale: 0.98 },
+    animate: { opacity: 1, x: 0, scale: 1 },
+    exit: { opacity: 0, x: isLowEndDevice ? -20 : -50, scale: 0.98 }
+  }), [isLowEndDevice]);
+
+  // Enhanced loader with simplified animation for fast initial render
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white flex items-center justify-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="text-center"
-        >
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ 
-              scale: 1,
-              transition: {
-                duration: 0.5,
-                ease: [0.22, 1, 0.36, 1]
-              }
-            }}
-            className="relative mb-6"
-          >
+        <div className="text-center">
+          <div className="relative mb-6 transform-gpu">
             <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-violet-600 rounded-full blur-xl opacity-70" 
                  style={{ transform: 'scale(1.1)' }}></div>
-            <motion.div
-              animate={{ 
-                rotate: 360,
-                scale: [1, 1.1, 1]
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              className="relative"
-            >
+            <div className="relative animate-pulse">
               <Sparkles size={60} className="text-blue-300" />
-            </motion.div>
-          </motion.div>
-          
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <motion.p 
-              className="text-2xl font-light tracking-wider text-blue-100"
-              animate={{ opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-            >
-              Crafting Experience
-            </motion.p>
-            <div className="mt-2 flex justify-center space-x-1">
-              <motion.div
-                className="w-2 h-2 rounded-full bg-blue-400"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.2 }}
-              />
-              <motion.div
-                className="w-2 h-2 rounded-full bg-blue-400"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.3, delay: 0.1 }}
-              />
-              <motion.div
-                className="w-2 h-2 rounded-full bg-blue-400"
-                animate={{ scale: [1, 1.5, 1] }}
-                transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 0.4, delay: 0.2 }}
-              />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+          
+          <div>
+            <p className="text-2xl font-light tracking-wider text-blue-100 animate-pulse">
+              Loading Experience
+            </p>
+            <div className="mt-2 flex justify-center space-x-1">
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"/>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse delay-100"/>
+              <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse delay-200"/>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 text-white overflow-x-hidden">
-      {/* Interactive 3D Parallax Background */}
-      <ParallaxBackground />
+      {/* Defer background render for faster initial paint */}
+      <Suspense fallback={null}>
+        <ParallaxBackground />
+      </Suspense>
 
       <div className="fixed top-0 left-0 right-0 z-50">
         <Header />
@@ -174,39 +198,33 @@ function App() {
           <main className="container mx-auto px-4 py-8 relative mb-20">
             <div className="flex items-center justify-between mb-12">
               <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={!isLowEndDevice ? { scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)' } : undefined}
+                whileTap={!isLowEndDevice ? { scale: 0.95 } : undefined}
                 onClick={handlePrev}
                 disabled={currentSection === 0}
-                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
+                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all ${
                   currentSection === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
-                }`}
+                } transform-gpu`}
                 aria-label="Previous section"
               >
                 <ChevronLeft size={24} />
                 <span className="sr-only">Previous</span>
               </motion.button>
               
-              <motion.h2 
-                className="text-4xl font-bold text-center"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                key={currentSection}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              >
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-violet-400 text-shadow">
+              <h2 className="text-4xl font-bold text-center transition-opacity duration-300 transform-gpu">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-violet-400">
                   {sections[currentSection]}
                 </span>
-              </motion.h2>
+              </h2>
               
               <motion.button
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)', boxShadow: '0 0 15px rgba(59, 130, 246, 0.6)' }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={!isLowEndDevice ? { scale: 1.1, backgroundColor: 'rgba(59, 130, 246, 0.4)' } : undefined}
+                whileTap={!isLowEndDevice ? { scale: 0.95 } : undefined}
                 onClick={handleNext}
                 disabled={currentSection === sections.length - 1}
-                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all duration-300 border border-blue-500/30 ${
+                className={`p-3 rounded-full bg-blue-500/20 backdrop-blur-md transition-all ${
                   currentSection === sections.length - 1 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/30 hover:border-blue-400'
-                }`}
+                } transform-gpu`}
                 aria-label="Next section"
               >
                 <ChevronRight size={24} />
@@ -221,58 +239,30 @@ function App() {
                 initial="initial"
                 animate="animate"
                 exit="exit"
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                className="glass-card backdrop-blur-md shadow-2xl overflow-hidden relative"
+                transition={{ 
+                  type: "spring", 
+                  stiffness: isLowEndDevice ? 200 : 300, 
+                  damping: isLowEndDevice ? 25 : 30 
+                }}
+                className="glass-card backdrop-blur-md shadow-2xl overflow-hidden relative transform-gpu"
                 style={{ boxShadow: '0 20px 80px -20px rgba(59, 130, 246, 0.3)' }}
               >
-                {/* Glowing accent border animation */}
-                <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                  <motion.div 
-                    className="absolute top-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-violet-500"
-                    animate={{ x: ['0%', '200%'] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  />
-                  <motion.div 
-                    className="absolute bottom-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-violet-500 to-blue-500"
-                    animate={{ x: ['200%', '0%'] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  />
-                  <motion.div 
-                    className="absolute right-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-blue-500 to-violet-500"
-                    animate={{ y: ['0%', '200%'] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  />
-                  <motion.div 
-                    className="absolute left-0 -inset-y-full w-0.5 bg-gradient-to-b from-transparent via-violet-500 to-blue-500"
-                    animate={{ y: ['200%', '0%'] }}
-                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                  />
-                </div>
-
-                <Suspense fallback={
-                  <div className="flex justify-center items-center h-96">
-                    <motion.div
-                      animate={{ 
-                        rotate: 360,
-                        scale: [1, 1.1, 1]
-                      }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity,
-                        ease: "easeInOut"
-                      }}
-                    >
-                      <Sparkles className="text-blue-400" size={30} />
-                    </motion.div>
-                    <motion.span 
-                      className="ml-3 text-blue-200 font-light tracking-wider"
-                      animate={{ opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      Loading...
-                    </motion.span>
+                {!isLowEndDevice && (
+                  <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                    <motion.div 
+                      className="absolute top-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-blue-500 to-violet-500"
+                      animate={{ x: ['0%', '200%'] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    />
+                    <motion.div 
+                      className="absolute bottom-0 -inset-x-full h-0.5 bg-gradient-to-r from-transparent via-violet-500 to-blue-500"
+                      animate={{ x: ['200%', '0%'] }}
+                      transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                    />
                   </div>
-                }>
+                )}
+
+                <Suspense fallback={<LoadingPlaceholder />}>
                   {currentSection === 0 && <Hero onNavigate={setCurrentSection} />}
                   {currentSection === 1 && <Experience />}
                   {currentSection === 2 && <Skills />}
@@ -284,7 +274,7 @@ function App() {
         </motion.div>
       </div>
 
-      {/* Fixed bottom navigation bar for floating components */}
+      {/* Fixed bottom navigation bar for floating components - conditionally rendered */}
       <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-3">
         <Suspense fallback={null}>
           {showTourGuide && (
@@ -307,4 +297,5 @@ function App() {
   );
 }
 
-export default App;
+// Use memo to prevent unnecessary re-renders of the entire app
+export default React.memo(App);
