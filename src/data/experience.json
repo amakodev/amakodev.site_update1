@@ -1,0 +1,22 @@
+{
+  "experiences": [
+    {
+      "company": "Tech Solutions Inc.",
+      "position": "Senior Full Stack Developer",
+      "period": "2021 - Present",
+      "description": "Led development of enterprise-scale React applications, implemented microservices architecture, and mentored junior developers."
+    },
+    {
+      "company": "Digital Innovations",
+      "position": "Full Stack Developer",
+      "period": "2019 - 2021",
+      "description": "Developed and maintained multiple client projects using React, Node.js, and AWS. Improved application performance by 40%."
+    },
+    {
+      "company": "StartUp Labs",
+      "position": "Junior Developer",
+      "period": "2018 - 2019",
+      "description": "Built responsive web applications and RESTful APIs. Collaborated with design team to implement UI/UX improvements."
+    }
+  ]
+}

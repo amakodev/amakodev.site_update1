@@ -1,0 +1,32 @@
+{
+  "categories": [
+    {
+      "title": "Frontend",
+      "icon": "Code2",
+      "iconColor": "text-blue-400",
+      "skills": ["React", "TypeScript", "Next.js", "Tailwind CSS", "Redux"],
+      "level": 90
+    },
+    {
+      "title": "Backend",
+      "icon": "Database",
+      "iconColor": "text-green-400",
+      "skills": ["Node.js", "Express", "Python", "PostgreSQL", "MongoDB"],
+      "level": 85
+    },
+    {
+      "title": "Cloud & DevOps",
+      "icon": "Cloud",
+      "iconColor": "text-purple-400",
+      "skills": ["AWS", "Docker", "CI/CD", "Kubernetes", "Terraform"],
+      "level": 80
+    },
+    {
+      "title": "Design & Tools",
+      "icon": "Palette",
+      "iconColor": "text-pink-400",
+      "skills": ["Figma", "Git", "Jira", "Agile", "Testing"],
+      "level": 75
+    }
+  ]
+}

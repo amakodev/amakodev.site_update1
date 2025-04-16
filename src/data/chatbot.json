@@ -1,0 +1,10 @@
+{
+  "responses": {
+    "greeting": "Hi! I'm John's AI assistant. I can help you learn more about his experience, skills, and projects. What would you like to know?",
+    "experience": "John has over 5 years of experience in full-stack development, progressing from Junior Developer to Senior Full Stack Developer. His expertise includes React, Node.js, and cloud technologies.",
+    "skills": "John's key skills include:\n- Frontend: React, TypeScript, Next.js\n- Backend: Node.js, Express, Python\n- Cloud: AWS, Docker, Kubernetes\n- And more! Would you like specific details about any area?",
+    "projects": "John has worked on several impressive projects, including a scalable e-commerce platform and a real-time task management system. Each project demonstrates his full-stack capabilities.",
+    "contact": "You can reach John through the contact form in the Contact section, or connect with him on LinkedIn and GitHub. Would you like direct links?",
+    "default": "I'd be happy to tell you more about John's experience and skills. What specific aspect interests you?"
+  }
+}
