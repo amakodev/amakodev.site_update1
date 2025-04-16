@@ -285,27 +285,35 @@ function App() {
         </motion.div>
       </div>
 
-      {/* Render ChatbotAgent directly */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <ChatbotAgent />
-      </div>
+      {/* Consolidated container for fixed floating elements */}
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end space-y-3 
+                      md:bottom-6 md:right-6 md:space-y-4">
+        
+        {/* Floating Contact Button (conditionally rendered) */}
+        {hasScrolled && (
+          <Suspense fallback={null}>
+            <FloatingContact />
+          </Suspense>
+        )}
 
-      {/* Conditionally render TourGuide with Suspense */}
-      {showTourGuide && (
-        <Suspense fallback={null}>
-          <TourGuide 
-            currentSection={currentSection}
-            onClose={() => setShowTourGuide(false)} 
-          />
-        </Suspense>
-      )}
-      
-      {/* Conditionally render FloatingContact with Suspense */}
-      {hasScrolled && (
-        <Suspense fallback={null}>
-          <FloatingContact />
-        </Suspense>
-      )}
+        {/* Tour Guide (conditionally rendered) */}
+        {showTourGuide && (
+          <Suspense fallback={null}>
+            {/* TourGuide might need internal adjustments for small screens if it overlaps */}
+            <TourGuide 
+              currentSection={currentSection}
+              onClose={() => setShowTourGuide(false)} 
+            />
+          </Suspense>
+        )}
+
+        {/* Chatbot Agent */}
+        {/* Wrap ChatbotAgent in its own div if more specific positioning is needed */}
+        <div> 
+          <ChatbotAgent />
+        </div>
+        
+      </div>
     </div>
   );
 }
